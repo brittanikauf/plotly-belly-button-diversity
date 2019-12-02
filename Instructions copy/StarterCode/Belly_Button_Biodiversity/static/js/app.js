@@ -2,29 +2,68 @@ function buildMetadata(sample) {
 
   // @TODO: Complete the following function that builds the metadata panel
 
-  // Use `d3.json` to fetch the metadata for a sample
-    // Use d3 to select the panel with id of `#sample-metadata`
+    d3.json("/metadata/"+ sample).then(function(data) {
+      var selector = d3.select("#sample-metadata").html(""); 
+      selector.html("");
 
-    // Use `.html("") to clear any existing metadata
+      for (i = 0; i < 5; i++) {
+        selector.append("text").html("font size='1'>"
+        + Object.entries(data) [i][0] + ":"
+        + Object.entries(data)[i][1] + "</font><br>");
+      };
 
-    // Use `Object.entries` to add each key and value pair to the panel
-    // Hint: Inside the loop, you will need to use d3 to append new
-    // tags for each key-value in the metadata.
+      selector.append("text").html("font size='1'>SAMPLEID: " + Object.entires(data) [6][1] + "</font><br>");
+    }); 
 
-    // BONUS: Build the Gauge Chart
-    // buildGauge(data.WFREQ);
 }
 
 function buildCharts(sample) {
 
   // @TODO: Use `d3.json` to fetch the sample data for the plots
 
-    // @TODO: Build a Bubble Chart using the sample data
+d3.json("/samples/"+ sample).then(function(data) {
+  var otu_id = data.otu_id; 
+  var otu_label = data.otu_label; 
+  var sample_value = data.sample_value; 
 
-    // @TODO: Build a Pie Chart
-    // HINT: You will need to use slice() to grab the top 10 sample_values,
-    // otu_ids, and labels (10 each).
-}
+var trace1 = {
+  x: otu_id, 
+  y: sample_value, 
+  mode: 'markers', 
+  marker: {
+    size: sample_value, 
+    color: otu_id}, 
+    text: otu_label
+  }; 
+
+  var data1 = [trace1]; 
+
+  var layout = {
+    showlegend: false
+  }; 
+
+  plotly.newPlot("bubble", data1, layout); 
+
+var sample_data = sample.data.sort(function(a,b) {
+  return b.sample_value - a.sample_value; 
+
+}); 
+
+sample_data = sample_data.slice(0, 10); 
+
+var trace2 = {
+  labels: sample_data.map(row => row.otu_id), 
+  values: sample_data.map(row => row.sample_value), 
+  hovertext: sample_data.map(row => row.otu_label), 
+  type: "pie"
+}; 
+
+var data2 = [trace2]; 
+
+Plotly.newPlot("pie", data2); 
+
+}); 
+} 
 
 function init() {
   // Grab a reference to the dropdown select element
